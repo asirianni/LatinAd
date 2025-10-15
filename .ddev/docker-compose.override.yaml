@@ -1,0 +1,45 @@
+version: '3.6'
+
+services:
+  web:
+    environment:
+      - VIRTUAL_HOST=${DDEV_HOSTNAME}
+      - HTTP_EXPOSE=${DDEV_ROUTER_HTTP_PORT}:80,${DDEV_MAILHOG_PORT}:8025
+      - HTTPS_EXPOSE=${DDEV_ROUTER_HTTPS_PORT}:443
+    labels:
+      - "ddev.site-name=${DDEV_SITENAME}"
+      - "ddev.app-type=${DDEV_APPTYPE}"
+      - "ddev.approot=${DDEV_APPROOT}"
+
+  db:
+    environment:
+      MYSQL_DATABASE: latinad_db
+      MYSQL_USER: latinad_user
+      MYSQL_PASSWORD: latinad_password
+      MYSQL_ROOT_PASSWORD: root_password
+
+  redis:
+    image: redis:alpine
+    container_name: ${DDEV_PROJECT}_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - ${DDEV_PROJECT}_default
+    command: redis-server --appendonly yes
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ${DDEV_PROJECT}_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - ${DDEV_PROJECT}_default
+
+volumes:
+  redisdata:
+    driver: local

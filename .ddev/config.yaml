@@ -1,0 +1,51 @@
+name: latinad
+type: laravel
+docroot: public
+php_version: "8.3"
+webserver_type: nginx-fpm
+router_http_port: "8080"
+router_https_port: "8443"
+xdebug_enabled: false
+additional_hostnames: []
+additional_fqdns: []
+mariadb_version: "10.4"
+mysql_version: ""
+nfs_mount_enabled: false
+mutagen_enabled: false
+use_dns_when_possible: true
+composer_version: "2"
+web_environment: []
+
+# Database configuration
+database:
+  type: mysql
+  version: "8.0"
+
+# Additional services
+additional_services: []
+
+# Custom configuration
+hooks:
+  post-start:
+    - exec: composer install --no-dev --optimize-autoloader
+    - exec: php artisan key:generate --force
+    - exec: php artisan migrate --force
+    - exec: php artisan config:cache
+    - exec: php artisan route:cache
+    - exec: php artisan view:cache
+
+# Override default nginx configuration
+nginx_nginx_conf_includes: []
+nginx_fastcgi_params_includes: []
+
+# Override default PHP configuration
+php_ini_includes: []
+
+# Override default MySQL configuration
+mysql_mycnf_includes: []
+
+# Override default Apache configuration (not used with nginx-fpm)
+apache_apache_conf_includes: []
+
+# Override default Apache virtual host configuration (not used with nginx-fpm)
+apache_vhosts_includes: []
