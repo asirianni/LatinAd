@@ -54,6 +54,81 @@ La API maneja **Displays** (pantallas digitales) con operaciones CRUD completas.
 
 **Base URL**: `http://localhost:8080/api`
 
+### 🔄 **Flujo de Trabajo Completo**
+
+**1. Iniciar sesión para obtener token:**
+```bash
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "tumail@gmail.com", "password": "1234"}'
+```
+
+**2. Guardar el token de la respuesta y usarlo en todas las operaciones:**
+```bash
+# Ejemplo: Listar displays
+curl -H "Authorization: Bearer [tu_token_aqui]" \
+  http://localhost:8080/api/displays
+```
+
+### 🔐 **Autenticación**
+
+#### **Login**
+```bash
+POST /api/login
+```
+
+**Ejemplo:**
+```bash
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "tumail@gmail.com",
+    "password": "1234"
+  }'
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "message": "Login exitoso",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Test User",
+      "email": "tumail@gmail.com"
+    },
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "token_type": "bearer",
+    "expires_in": 3600
+  }
+}
+```
+
+**Error de Credenciales (401):**
+```json
+{
+  "success": false,
+  "message": "Credenciales inválidas"
+}
+```
+
+**Campos requeridos:**
+- `email` - Email del usuario
+- `password` - Contraseña del usuario
+
+**Uso del Token JWT:**
+Para acceder a los endpoints protegidos, incluye el token en el header:
+```bash
+curl -H "Authorization: Bearer tu_token_aqui" http://localhost:8080/api/displays
+```
+
+---
+
+### 🖥️ **Displays**
+
+> **⚠️ IMPORTANTE:** Todas las rutas de Displays requieren autenticación JWT. Debes incluir el header `Authorization: Bearer [token]` obtenido del endpoint `/api/login`.
+
 #### 1. **Listar Displays**
 ```bash
 GET /api/displays
@@ -61,7 +136,8 @@ GET /api/displays
 
 **Ejemplo:**
 ```bash
-curl http://localhost:8080/api/displays
+curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
+  http://localhost:8080/api/displays
 ```
 
 **Filtros opcionales:**
@@ -78,7 +154,8 @@ GET /api/displays/{id}
 
 **Ejemplo:**
 ```bash
-curl http://localhost:8080/api/displays/1
+curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
+  http://localhost:8080/api/displays/1
 ```
 
 ---
@@ -92,6 +169,7 @@ POST /api/displays
 ```bash
 curl -X POST http://localhost:8080/api/displays \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
   -d '{
     "name": "Display Centro Comercial",
     "description": "Pantalla LED para shopping",
@@ -125,6 +203,7 @@ PUT /api/displays/{id}
 ```bash
 curl -X PUT http://localhost:8080/api/displays/1 \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." \
   -d '{
     "name": "Display Actualizado",
     "price_per_day": 300.00
@@ -142,7 +221,8 @@ DELETE /api/displays/{id}
 
 **Ejemplo:**
 ```bash
-curl -X DELETE http://localhost:8080/api/displays/1
+curl -X DELETE http://localhost:8080/api/displays/1 \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
 ```
 
 ### 📊 Respuestas de la API
@@ -195,10 +275,23 @@ curl -X DELETE http://localhost:8080/api/displays/1
 }
 ```
 
+#### ❌ **No Autenticado (401)**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+> **Nota:** Este error aparece cuando:
+> - No incluyes el header `Authorization`
+> - El token JWT ha expirado
+> - El token JWT es inválido
+
 ### 🔧 Códigos de Estado HTTP
 
 - **200** - OK (GET, PUT, DELETE exitosos)
 - **201** - Created (POST exitoso)
+- **401** - Unauthorized (token faltante o inválido)
 - **404** - Not Found (recurso no existe)
 - **422** - Unprocessable Entity (errores de validación)
 
