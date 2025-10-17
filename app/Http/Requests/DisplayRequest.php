@@ -25,15 +25,21 @@ class DisplayRequest extends FormRequest
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         $requiredRule = $isUpdate ? 'sometimes|required' : 'required';
         
-        return [
+        $rules = [
             'name' => $requiredRule . '|string|max:255',
             'description' => 'nullable|string',
             'price_per_day' => $requiredRule . '|numeric|min:0',
             'resolution_height' => $requiredRule . '|integer|min:1',
             'resolution_width' => $requiredRule . '|integer|min:1',
             'type' => $requiredRule . '|in:indoor,outdoor',
-            'user_id' => $requiredRule . '|exists:users,id',
         ];
+
+        // Solo requerir user_id en updates, no en store (se asigna automáticamente)
+        if ($isUpdate) {
+            $rules['user_id'] = 'sometimes|required|exists:users,id';
+        }
+
+        return $rules;
     }
 
     /**

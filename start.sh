@@ -120,6 +120,10 @@ $DOCKER_COMPOSE exec app php artisan key:generate
 print_status "Running database migrations..."
 $DOCKER_COMPOSE exec app php artisan migrate
 
+# Run test data seeder
+print_status "Seeding database with test data..."
+$DOCKER_COMPOSE exec app php artisan db:seed --class=TestDataSeeder
+
 # Clear and cache configuration
 print_status "Optimizing application..."
 $DOCKER_COMPOSE exec app php artisan config:cache

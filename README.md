@@ -33,6 +33,7 @@ El proyecto está configurado con:
 - ✅ Configura la base de datos
 - ✅ Instala dependencias
 - ✅ Ejecuta migraciones
+- ✅ **Pobla las tablas con datos de prueba** (2 usuarios + 10 displays)
 - ✅ Optimiza la aplicación
 
 ### URLs de Acceso
@@ -295,7 +296,61 @@ curl -X DELETE http://localhost:8080/api/displays/1 \
 - **404** - Not Found (recurso no existe)
 - **422** - Unprocessable Entity (errores de validación)
 
-## 🤝 Contribución
+## 🧪 Testing
 
-Este es un challenge de Adrian Sirianni.
+### Ejecutar Tests
+
+Para ejecutar los tests del sistema:
+
+```bash
+# Ejecutar todos los tests
+docker exec -it latinad_app php artisan test
+
+# Ejecutar tests específicos de ownership
+docker exec -it latinad_app php artisan test tests/Feature/DisplayOwnershipTest.php
+```
+
+### Resultado Esperado de los Tests
+
+Al ejecutar `php artisan test`, deberías ver algo similar a:
+
+```
+PASS  Tests\Feature\DisplayOwnershipTest
+✓ user can only see their own displays in the listing
+✓ user cannot see displays from another user  
+✓ user cannot access specific display from another user
+✓ user can access their own specific display
+✓ user cannot update display from another user
+✓ user can update their own display
+✓ user cannot delete display from another user
+✓ user can delete their own display
+✓ new display is automatically assigned to authenticated user
+✓ endpoints require authentication
+
+Tests:  10 passed
+Time:   0.45s
+```
+
+### ¿Qué Hacen los Tests?
+
+Los tests validan que:
+
+1. **🔒 Ownership Protection**: Un usuario solo puede ver, editar y eliminar sus propios displays
+2. **🚫 Access Control**: No puede acceder a displays de otros usuarios (retorna 404)
+3. **✅ Authentication**: Todos los endpoints requieren token JWT válido
+4. **🔄 Auto-assignment**: Los nuevos displays se asignan automáticamente al usuario autenticado
+5. **📊 Data Integrity**: Verifica que los datos se mantengan consistentes en la base de datos
+
+### Datos de Prueba Creados
+
+El seeder crea automáticamente:
+
+- **2 usuarios de prueba:**
+  - `test1@example.com` / `password123`
+  - `test2@example.com` / `password123`
+- **10 displays distribuidos** entre los usuarios
+- **Datos visibles** para testing con Postman
+
+## 🤝 Contribución
+Adrian Sirianni.
 

@@ -24,7 +24,7 @@ class Display extends Model
     ];
 
     /**
-     * Relación con el usuario propietario
+     * Relationship with the owner user
      */
     public function user(): BelongsTo
     {
@@ -32,7 +32,7 @@ class Display extends Model
     }
 
     /**
-     * Accessor para la resolución completa
+     * Accessor for the complete resolution
      */
     public function getResolutionAttribute()
     {
@@ -40,10 +40,26 @@ class Display extends Model
     }
 
     /**
-     * Accessor para formatear el precio
+     * Accessor to format the price
      */
     public function getFormattedPriceAttribute()
     {
         return '$' . number_format($this->price_per_day, 2);
+    }
+
+    /**
+     * Scope to filter displays for the authenticated user
+     */
+    public function scopeForUser($query, $userId = null)
+    {
+        return $query->where('user_id', $userId ?? auth()->id());
+    }
+
+    /**
+     * Scope to verify display ownership
+     */
+    public function scopeOwnedBy($query, $userId = null)
+    {
+        return $query->where('user_id', $userId ?? auth()->id());
     }
 }
