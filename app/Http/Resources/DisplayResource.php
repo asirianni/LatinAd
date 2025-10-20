@@ -27,6 +27,8 @@ class DisplayResource extends JsonResource
             ],
             'type' => $this->type,
             'type_label' => $this->type === 'indoor' ? 'Interior' : 'Exterior',
+            'photo_url' => $this->photo_url,
+            'photo_thumb_url' => $this->photo_thumb_url,
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,

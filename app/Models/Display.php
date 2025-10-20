@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Services\PhotoService;
+use Illuminate\Support\Facades\Storage;
 
 class Display extends Model
 {
@@ -15,6 +17,8 @@ class Display extends Model
         'resolution_width',
         'type',
         'user_id',
+        'photo_path',
+        'photo_thumb_path',
     ];
 
     protected $casts = [
@@ -61,5 +65,44 @@ class Display extends Model
     public function scopeOwnedBy($query, $userId = null)
     {
         return $query->where('user_id', $userId ?? auth()->id());
+    }
+
+    /**
+     * Accessor for photo URL
+     */
+    public function getPhotoUrlAttribute()
+    {
+        if (!$this->photo_path) {
+            return null;
+        }
+        
+        return Storage::disk('public')->url($this->photo_path);
+    }
+
+    /**
+     * Accessor for thumbnail URL
+     */
+    public function getPhotoThumbUrlAttribute()
+    {
+        if (!$this->photo_thumb_path) {
+            return null;
+        }
+        
+        return Storage::disk('public')->url($this->photo_thumb_path);
+    }
+
+    /**
+     * Delete photo files when display is deleted
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($display) {
+            if ($display->photo_path || $display->photo_thumb_path) {
+                $photoService = app(PhotoService::class);
+                $photoService->deletePhotoFiles($display->photo_path, $display->photo_thumb_path);
+            }
+        });
     }
 }

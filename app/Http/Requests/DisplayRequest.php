@@ -32,6 +32,7 @@ class DisplayRequest extends FormRequest
             'resolution_height' => $requiredRule . '|integer|min:1',
             'resolution_width' => $requiredRule . '|integer|min:1',
             'type' => $requiredRule . '|in:indoor,outdoor',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120', // 5MB max
         ];
 
         // Solo requerir user_id en updates, no en store (se asigna automáticamente)
@@ -63,6 +64,9 @@ class DisplayRequest extends FormRequest
             'type.in' => 'El tipo debe ser "indoor" o "outdoor".',
             'user_id.required' => 'El ID del usuario es obligatorio.',
             'user_id.exists' => 'El usuario especificado no existe.',
+            'photo.image' => 'El archivo debe ser una imagen válida.',
+            'photo.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
+            'photo.max' => 'La imagen no puede ser mayor a 5MB.',
         ];
     }
 }

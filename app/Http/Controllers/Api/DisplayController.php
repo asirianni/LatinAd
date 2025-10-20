@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Display;
 use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\DisplayResource;
+use App\Services\PhotoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -45,6 +46,13 @@ class DisplayController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = auth()->id(); // Automatically assign to authenticated user
+        
+        // Handle photo upload if present
+        if ($request->hasFile('photo')) {
+            $photoService = app(PhotoService::class);
+            $photoData = $photoService->processPhoto($request->file('photo'), auth()->id());
+            $data = array_merge($data, $photoData);
+        }
         
         $display = Display::create($data);
         $display->load('user');
@@ -90,7 +98,23 @@ class DisplayController extends Controller
             ], 404);
         }
 
-        $display->update($request->validated());
+        $data = $request->validated();
+        
+        // Handle photo upload if present
+        if ($request->hasFile('photo')) {
+            $photoService = app(PhotoService::class);
+            
+            // Delete old photos if they exist
+            if ($display->photo_path || $display->photo_thumb_path) {
+                $photoService->deletePhotoFiles($display->photo_path, $display->photo_thumb_path);
+            }
+            
+            // Process new photo
+            $photoData = $photoService->processPhoto($request->file('photo'), $display->id);
+            $data = array_merge($data, $photoData);
+        }
+
+        $display->update($data);
         $display->load('user');
 
         return response()->json([
